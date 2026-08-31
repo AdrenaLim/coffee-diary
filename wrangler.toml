@@ -1,0 +1,11 @@
+name = "coffee-diary"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+
+[assets]
+directory = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "coffee-diary"
+database_id = "6dd9d881-1bec-420d-a058-ec8e19cf83f0"

@@ -1,0 +1,10 @@
+{
+  "name": "coffee-diary",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8788",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 execute coffee-diary --local --file=schema.sql",
+    "db:remote": "wrangler d1 execute coffee-diary --remote --file=schema.sql"
+  }
+}
