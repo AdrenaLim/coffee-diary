@@ -23,11 +23,16 @@ function parseBrew(body) {
   const grind = num(body.grind, 'grind', 0, 100);
   const dose_g = num(body.dose_g, 'dose_g', 0, 500);
   const water_g = num(body.water_g, 'water_g', 0, 5000);
-  const seconds = num(body.seconds, 'seconds', 0, 86400);
-  if (seconds !== null) body._seconds = Math.round(seconds);
+  // seconds optional — null means "didn't time it", stored as 0
+  let seconds = null;
+  if (body.seconds != null && body.seconds !== ''){
+    const s = Number(body.seconds);
+    if (!Number.isFinite(s)) errors.push('seconds must be a number');
+    else seconds = Math.min(86400, Math.max(0, s));
+  }
 
   let rating = Number(body.rating);
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) errors.push('rating must be an integer 1-5');
+  if (!Number.isInteger(rating) || rating < 1 || rating > 10) errors.push('rating must be an integer 1-10');
 
   const notes = String(body.notes || '').trim().slice(0, 600);
 
@@ -39,7 +44,7 @@ function parseBrew(body) {
       grind,
       dose_g,
       water_g,
-      seconds: Math.round(seconds),
+      seconds: seconds == null ? 0 : Math.round(seconds),
       rating,
       notes,
     },
