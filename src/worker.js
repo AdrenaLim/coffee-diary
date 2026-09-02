@@ -23,6 +23,7 @@ function parseBrew(body) {
   const grind = num(body.grind, 'grind', 0, 100);
   const dose_g = num(body.dose_g, 'dose_g', 0, 500);
   const water_g = num(body.water_g, 'water_g', 0, 5000);
+  const milk_g = (body.milk_g == null || body.milk_g === '') ? 0 : num(body.milk_g, 'milk_g', 0, 5000);   // ice latte milk, optional
   // seconds optional — null means "didn't time it", stored as 0
   let seconds = null;
   if (body.seconds != null && body.seconds !== ''){
@@ -44,6 +45,7 @@ function parseBrew(body) {
       grind,
       dose_g,
       water_g,
+      milk_g,
       seconds: seconds == null ? 0 : Math.round(seconds),
       rating,
       notes,
@@ -78,10 +80,10 @@ export default {
         const { errors, brew } = parseBrew(body);
         if (errors) return json({ error: errors.join('; ') }, 400);
         const { success, meta } = await env.DB.prepare(
-          `INSERT INTO brews (method, bean, grind, dose_g, water_g, seconds, rating, notes)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO brews (method, bean, grind, dose_g, water_g, milk_g, seconds, rating, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
-          .bind(brew.method, brew.bean, brew.grind, brew.dose_g, brew.water_g, brew.seconds, brew.rating, brew.notes)
+          .bind(brew.method, brew.bean, brew.grind, brew.dose_g, brew.water_g, brew.milk_g, brew.seconds, brew.rating, brew.notes)
           .run();
         const id = meta.last_row_id;
         const row = await env.DB.prepare('SELECT * FROM brews WHERE id = ?').bind(id).first();

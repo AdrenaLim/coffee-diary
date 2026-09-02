@@ -759,6 +759,7 @@ const METHOD_DEFS = {
   },
   icelatte: {
     label:'Ice Latte', grind:[5,10,7], doseToggle:[18,20,18], water:36, waterHint:'ml espresso over ice',
+    milk:[100,300,180,10],   // min, max, default, step
     secChips:[[20,'20s'],[25,'25s'],[28,'28s'],[30,'30s'],[32,'32s']], secHint:'extraction',
   },
   coldbrew: {
@@ -807,6 +808,18 @@ function setMethod(m){
     doseLabel.textContent = 'grams in';
   }
 
+  // milk slider — ice latte only
+  const milkField = $('#milk-field');
+  if (d.milk){
+    const [mn, mx, def, step] = d.milk;
+    const ms = $('#f-milk');
+    ms.min = mn; ms.max = mx; ms.step = step; ms.value = def;
+    $('#milk-val').textContent = def + 'ml';
+    milkField.style.display = 'block';
+  } else {
+    milkField.style.display = 'none';
+  }
+
   // water default
   $('#f-water').value = d.water;
   $('#water-hint').textContent = d.waterHint;
@@ -850,6 +863,11 @@ $('#f-grind').addEventListener('input', () => {
   saveDraft();
 });
 
+$('#f-milk').addEventListener('input', () => {
+  $('#milk-val').textContent = $('#f-milk').value + 'ml';
+  saveDraft();
+});
+
 // draft persistence
 const draftKeys = ['f-bean','f-water','f-seconds','f-notes'];
 function saveDraft(){
@@ -889,6 +907,7 @@ $('#brew-form').addEventListener('submit', async e => {
     grind: parseFloat($('#f-grind').value),
     dose_g: currentDose(),
     water_g: parseFloat($('#f-water').value),
+    milk_g: state.method === 'icelatte' ? parseInt($('#f-milk').value, 10) : 0,
     seconds: parseInt($('#f-seconds').value, 10),
     rating: state.rating,
     notes: $('#f-notes').value.trim(),
@@ -1007,6 +1026,7 @@ function renderEntries(){
         <span class="p">GRIND <b>${escapeHtml(x.grind)}</b></span>
         <span class="p">DOSE <b>${escapeHtml(x.dose_g)}g</b></span>
         <span class="p">WATER <b>${escapeHtml(x.water_g)}ml</b></span>
+        ${x.milk_g ? `<span class="p">MILK <b>${escapeHtml(x.milk_g)}ml</b></span>` : ''}
         <span class="p">${x.method === 'coldbrew' ? 'STEEP' : 'PULL'} <b>${fmtSeconds(x.seconds)}</b></span>
       </div>
       ${x.notes ? `<div class="entry-notes">“${escapeHtml(x.notes)}”</div>` : ''}
