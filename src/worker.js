@@ -5,7 +5,7 @@ const json = (data, status = 200) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });
 
-const METHODS = new Set(['latte', 'coldbrew']);
+const METHODS = new Set(['latte', 'icelatte', 'coldbrew']);
 
 function parseBrew(body) {
   const errors = [];

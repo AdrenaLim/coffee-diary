@@ -111,7 +111,7 @@
   .row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media(max-width:480px){.row{grid-template-columns:1fr;}}
 
-  .method-toggle{display:grid; grid-template-columns:1fr 1fr; gap:0; border:2px solid var(--ink); margin-bottom:16px;}
+  .method-toggle{display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; border:2px solid var(--ink); margin-bottom:16px;}
   .method-toggle button{
     font-family:'Press Start 2P',monospace; font-size:8px; padding:13px 4px; letter-spacing:1px;
     background:var(--cream); color:var(--ink); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;
@@ -216,6 +216,7 @@
     background:var(--cream); border:1px solid var(--border); border-left:4px solid var(--caramel);
     padding:16px 18px; position:relative; box-shadow:2px 3px 0 rgba(56,39,24,.08);
   }
+  .entry.method-icelatte{border-left-color:#5a8ab0;}
   .entry.method-coldbrew{border-left-color:var(--accent);}
   .entry.flash{animation:flashcard 1.6s ease;}
   @keyframes flashcard{0%,60%{background:#f3e2bd;}100%{background:var(--cream);}}
@@ -305,6 +306,7 @@
 
       <div class="method-toggle" role="radiogroup" aria-label="Method">
         <button type="button" id="m-latte" class="active"><canvas width="26" height="26" data-icon="latte"></canvas>LATTE</button>
+        <button type="button" id="m-icelatte"><canvas width="26" height="26" data-icon="icelatte"></canvas>ICE LATTE</button>
         <button type="button" id="m-coldbrew"><canvas width="26" height="26" data-icon="coldbrew"></canvas>COLD BREW</button>
       </div>
 
@@ -364,6 +366,7 @@
     <div class="stat"><div class="num" id="st-avg">–</div><div class="lbl">Avg rating</div></div>
     <div class="stat"><div class="num" id="st-best">–</div><div class="lbl">Best rating</div></div>
     <div class="stat"><div class="num" id="st-latte">0</div><div class="lbl">Lattes</div></div>
+    <div class="stat"><div class="num" id="st-ice">0</div><div class="lbl">Ice lattes</div></div>
     <div class="stat"><div class="num" id="st-cold">0</div><div class="lbl">Cold brews</div></div>
   </section>
 
@@ -373,6 +376,7 @@
       <div class="log-tabs" id="log-tabs">
         <button type="button" class="active" data-filter="all">ALL</button>
         <button type="button" data-filter="latte">LATTE</button>
+        <button type="button" data-filter="icelatte">ICE LATTE</button>
         <button type="button" data-filter="coldbrew">COLD BREW</button>
         <button type="button" data-filter="bean">BY BEAN</button>
       </div>

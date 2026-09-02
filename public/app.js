@@ -87,6 +87,20 @@ function drawIcon(cv, kind){
     px(2,6,9,5,'#382718');
     px(3,11,7,1,'#241811');
     px(4,7,1,3,'#5c4430'); px(6,7,1,3,'#5c4430'); px(8,7,1,3,'#5c4430');
+  } else if (kind === 'icelatte'){
+    // tall glass: milk layer below, espresso layer on top, ice cubes, straw
+    px(3,0,7,1,'#241811');               // rim
+    px(2,1,1,10,'#241811'); px(10,1,1,10,'#241811'); // glass walls
+    px(3,11,7,1,'#241811');              // base
+    px(3,1,7,5,'#e8dcc2');               // milk layer (bottom 2/3)
+    px(3,6,7,4,'#a3704a');               // espresso layer floating on top
+    px(3,10,7,1,'#c8924a');              // caramel edge
+    // ice cubes (diamond glints)
+    px(4,3,2,2,'#bfe0f0'); px(5,3,1,'#eaf6fc');
+    px(7,5,2,2,'#bfe0f0'); px(8,5,1,'#eaf6fc');
+    px(4,8,2,2,'#bfe0f0'); px(5,8,1,'#eaf6fc');
+    // straw
+    px(8,0,1,3,'#a33a2a'); px(8,-1,1,1,'#c4657e');
   } else {
     px(4,0,5,2,'#241811');
     px(3,2,7,9,'#a34a24');
@@ -743,6 +757,10 @@ const METHOD_DEFS = {
     label:'Latte', grind:[5,10,7], doseToggle:[18,20,18], water:36, waterHint:'ml water out',
     secChips:[[25,'25s'],[28,'28s'],[30,'30s'],[32,'32s'],[36,'36s']], secHint:'extraction',
   },
+  icelatte: {
+    label:'Ice Latte', grind:[5,10,7], doseToggle:[18,20,18], water:36, waterHint:'ml espresso over ice',
+    secChips:[[20,'20s'],[25,'25s'],[28,'28s'],[30,'30s'],[32,'32s']], secHint:'extraction',
+  },
   coldbrew: {
     label:'Cold Brew', grind:[10,15,14], doseSlider:[55,100,55,5], water:800, waterHint:'ml water',
     secChips:[[43200,'12h'],[57600,'16h'],[64800,'18h'],[86400,'24h']], secHint:'steep time',
@@ -923,6 +941,7 @@ function renderStats(){
   $('#st-avg').textContent = b.length ? (b.reduce((s,x)=>s+x.rating,0)/b.length).toFixed(1) + ' ★' : '–';
   $('#st-best').textContent = b.length ? Math.max(...b.map(x=>x.rating)) + ' ★' : '–';
   $('#st-latte').textContent = b.filter(x=>x.method==='latte').length;
+  $('#st-ice').textContent = b.filter(x=>x.method==='icelatte').length;
   $('#st-cold').textContent = b.filter(x=>x.method==='coldbrew').length;
   $('#count-tag').textContent = b.length + (b.length === 1 ? ' ENTRY' : ' ENTRIES');
   $('#empty-state').style.display = b.length ? 'none' : 'block';
