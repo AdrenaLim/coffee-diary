@@ -34,7 +34,7 @@ function parseBrew(body) {
   }
 
   let rating = Number(body.rating);
-  if (!Number.isInteger(rating) || rating < 1 || rating > 10) errors.push('rating must be an integer 1-10');
+  if (!Number.isInteger(rating) || rating < 0 || rating > 10) errors.push('rating must be an integer 0-10');
 
   const notes = String(body.notes || '').trim().slice(0, 600);
   const recorder = RECORDERS.has(String(body.recorder || '').trim().toLowerCase())

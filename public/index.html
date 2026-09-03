@@ -239,6 +239,8 @@
   .stat:last-child{border-right:none;}
   .stat .num{font-family:'Playfair Display',serif; font-weight:700; font-size:26px; color:var(--accent-deep);}
   .stat .lbl{font-family:'Press Start 2P',monospace; font-size:7px; color:var(--muted); letter-spacing:1px; margin-top:4px; text-transform:uppercase;}
+  .stat-bean{flex:2 1 240px;}
+  .stat-bean .num{font-size:21px; line-height:1.2;}
 
   /* ============ diary log ============ */
   .log-card{margin-top:22px;}
@@ -412,7 +414,7 @@
         <div class="field">
           <label class="rating-label">Rating
             <canvas id="rater-icon" width="52" height="56" title="who is rating this brew"></canvas>
-            <span class="hint">1–10, be honest, future-you is reading</span>
+            <span class="hint">optional — unrated brews stay out of the diary until rated</span>
           </label>
           <div class="stars" id="stars"></div>
         </div>
@@ -431,9 +433,7 @@
     <div class="stat"><div class="num" id="st-total">0</div><div class="lbl">Brews logged</div></div>
     <div class="stat"><div class="num" id="st-avg">–</div><div class="lbl">Avg rating</div></div>
     <div class="stat"><div class="num" id="st-best">–</div><div class="lbl">Best rating</div></div>
-    <div class="stat"><div class="num" id="st-latte">0</div><div class="lbl">Lattes</div></div>
-    <div class="stat"><div class="num" id="st-ice">0</div><div class="lbl">Ice lattes</div></div>
-    <div class="stat"><div class="num" id="st-cold">0</div><div class="lbl">Cold brews</div></div>
+    <div class="stat stat-bean"><div class="num" id="st-bean">–</div><div class="lbl" id="st-bean-avg">Best coffee bean</div></div>
   </section>
 
   <section class="card log-card" aria-label="Diary entries">

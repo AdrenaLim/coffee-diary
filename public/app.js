@@ -1099,7 +1099,7 @@ $('#brew-form').addEventListener('submit', async e => {
   if (!brew.grind && brew.grind !== 0){ toast('ENTER A GRIND SETTING', true); return; }
   if (!brew.water_g && brew.water_g !== 0){ toast('ENTER WATER', true); return; }
   if (!brew.dose_g && brew.dose_g !== 0){ toast('PICK A DOSE', true); return; }
-  if (!brew.rating){ toast('GIVE IT A RATING', true); return; }
+  // rating optional — 0 means "not rated yet", excluded from the diary until rated
 
   const editing = state.editingId != null;
   const btn = $('#save-btn');
@@ -1148,27 +1148,58 @@ function renderAll(){
 }
 
 function renderStats(){
-  const b = state.brews;
-  $('#st-total').textContent = b.length;
-  $('#st-avg').textContent = b.length ? (b.reduce((s,x)=>s+x.rating,0)/b.length).toFixed(1) + ' ★' : '–';
-  $('#st-best').textContent = b.length ? Math.max(...b.map(x=>x.rating)) + ' ★' : '–';
-  $('#st-latte').textContent = b.filter(x=>x.method==='latte').length;
-  $('#st-ice').textContent = b.filter(x=>x.method==='icelatte').length;
-  $('#st-cold').textContent = b.filter(x=>x.method==='coldbrew').length;
-  $('#count-tag').textContent = b.length + (b.length === 1 ? ' ENTRY' : ' ENTRIES');
-  $('#empty-state').style.display = b.length ? 'none' : 'block';
+  const all = state.brews;
+  const rated = all.filter(x => x.rating > 0);   // unrated brews (rating 0) don't count
+  $('#st-total').textContent = all.length;
+  $('#st-avg').textContent = rated.length ? (rated.reduce((s,x)=>s+x.rating,0)/rated.length).toFixed(1) + ' ★' : '–';
+  $('#st-best').textContent = rated.length ? Math.max(...rated.map(x=>x.rating)) + ' ★' : '–';
+  // best bean by average rating (only beans with rated brews)
+  const byBean = {};
+  for (const x of rated){
+    if (!byBean[x.bean]) byBean[x.bean] = { sum:0, n:0 };
+    byBean[x.bean].sum += x.rating;
+    byBean[x.bean].n++;
+  }
+  const beanNames = Object.keys(byBean);
+  if (beanNames.length){
+    let bestBean = beanNames[0];
+    for (const b of beanNames){
+      if (byBean[b].sum / byBean[b].n > byBean[bestBean].sum / byBean[bestBean].n) bestBean = b;
+    }
+    $('#st-bean').textContent = bestBean;
+    $('#st-bean-avg').textContent = 'Best bean · avg ' + (byBean[bestBean].sum / byBean[bestBean].n).toFixed(1) + '★';
+  } else {
+    $('#st-bean').textContent = '–';
+    $('#st-bean-avg').textContent = 'Best coffee bean';
+  }
+  const ratedCount = rated.length;
+  $('#count-tag').textContent = all.length + (all.length === 1 ? ' ENTRY' : ' ENTRIES');
+  // diary empty-state: show when no rated brews exist (unrated ones are hidden)
+  const emptyEl = $('#empty-state');
+  if (!all.length){
+    emptyEl.style.display = 'block';
+    emptyEl.innerHTML = '<span class="pix">NO BREWS YET</span>Brew-o is waiting by the machine. Log your first cup and the diary will fill up.';
+  } else if (!ratedCount){
+    emptyEl.style.display = 'block';
+    emptyEl.innerHTML = '<span class="pix">NOTHING RATED YET</span>Your brews are logged, but none have a rating. Give one some stars and it will appear here.';
+  } else {
+    emptyEl.style.display = 'none';
+  }
 }
 
 function bestBrew(){
-  if (!state.brews.length) return null;
-  let best = state.brews[0];
-  for (const x of state.brews) if (x.rating > best.rating) best = x;
+  const rated = state.brews.filter(x => x.rating > 0);
+  if (!rated.length) return null;
+  let best = rated[0];
+  for (const x of rated) if (x.rating > best.rating) best = x;
   return best;
 }
 
 function diaryOrder(){
+  // only rated brews appear in the diary
+  const visible = state.brews.filter(x => x.rating > 0);
   const best = bestBrew();
-  const rest = state.brews.filter(x => !best || x.id !== best.id);
+  const rest = visible.filter(x => !best || x.id !== best.id);
   rest.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
   return best ? [best, ...rest] : rest;
 }
