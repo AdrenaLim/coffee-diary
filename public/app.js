@@ -19,6 +19,7 @@ const state = {
   beans: [],
   currentBean: null,
   removedBeans: [],
+  recorder: 'kang',
 };
 
 const COMMON_BEANS = [
@@ -602,8 +603,124 @@ function stopMusic(){
 }
 
 /* ================================================================
-   BEAN PICKER — click the cup in the scene
+   DANCERS — pixel Kang & Natasha dancing beside the log form.
+   Click to choose who is recording this diary entry.
 ================================================================ */
+const RECORDERS = {
+  kang:   { name:'KANG',    canvasId:'dancer-boy',  wrapId:'dancer-kang',   hair:'#241811', shirt:'#5a8ab0', pants:'#38465c' },
+  natasha:{ name:'NATASHA', canvasId:'dancer-girl', wrapId:'dancer-natasha', hair:'#5a3620', shirt:'#c4657e', skirt:'#a34a60' },
+};
+
+function drawDancer(ctx, who, t){
+  // 26x28 art grid, CELL 2 → 52x56 canvas
+  const CELL = 2;
+  const bob = reduced ? 0 : Math.round(Math.sin(t/300 + (who === 'natasha' ? Math.PI/2 : 0)) * 2);   // opposite bounce
+  const sway = reduced ? 0 : Math.round(Math.sin(t/300 + (who === 'natasha' ? Math.PI/2 : 0)) * 1);
+  const R = (x,y,w,h,c) => { ctx.fillStyle = c; ctx.fillRect(x*CELL, y*CELL, w*CELL, h*CELL); };
+
+  ctx.clearRect(0,0,52,56);
+
+  if (who === 'kang'){
+    // small boy — Kang: dark hair, blue tee, long pants, coffee cup in hand
+    R(10, 2+bob, 6, 2, '#241811');                      // hair
+    R(9, 4+bob, 8, 7, '#f0c8a0');                       // face
+    R(10, 10+bob, 6, 1, '#241811');                     // hair fringe line
+    R(11, 6+bob, 1, 1, '#241811'); R(14, 6+bob, 1, 1, '#241811');   // eyes
+    R(12, 8+bob, 2, 1, '#c46a5a');                      // smile
+    // body: blue tee
+    R(9, 11+bob, 8, 7, '#5a8ab0');
+    R(10, 12+bob, 6, 5, '#4a7298');
+    // arms — one swings up with the beat
+    const armUp = !reduced && Math.sin(t/300) > 0;
+    if (armUp){
+      R(7, 8+bob, 2, 5, '#f0c8a0');                    // left arm raised
+      R(17, 12+bob, 2, 5, '#f0c8a0');                   // right arm down
+      R(5, 6+bob, 3, 3, '#f8efdd');                     // coffee cup held high
+      R(6, 5+bob, 1, 1, '#c8924a');
+    } else {
+      R(7, 12+bob, 2, 5, '#f0c8a0');
+      R(17, 12+bob, 2, 5, '#f0c8a0');
+      R(19, 11+bob, 3, 3, '#f8efdd');                   // cup at side
+    }
+    // legs — step in place
+    const step = !reduced && Math.sin(t/300) > 0 ? 1 : 0;
+    R(9, 18+bob, 3, 7, '#38465c');
+    R(14, 18+bob, 3, 7, '#38465c');
+    R(9, 24+bob+step, 3, 2, '#241811');                 // shoes, one lifted
+    R(14, 24+bob+(1-step), 3, 2, '#241811');
+  } else {
+    // small girl — Natasha: brown hair, pink top, skirt, twin ponytails
+    R(10, 2+bob, 6, 2, '#5a3620');                      // hair
+    R(9, 4+bob, 8, 7, '#f4cfa4');                       // face
+    R(10, 5+bob, 6, 2, '#5a3620');                      // fringe
+    R(8, 3+bob, 2, 6, '#5a3620');  R(16, 3+bob, 2, 6, '#5a3620');  // hair sides
+    R(7, 4+bob, 1, 3, '#e8a0b4'); R(18, 4+bob, 1, 3, '#e8a0b4');  // pink ties
+    R(11, 7+bob, 1, 1, '#241811'); R(14, 7+bob, 1, 1, '#241811'); // eyes
+    R(12, 8+bob, 2, 1, '#c46a5a');                      // smile
+    R(11, 9+bob, 2, 1, '#e8a87a');                      // blush
+    R(14, 9+bob, 2, 1, '#e8a87a');
+    // body: pink top + skirt
+    R(9, 11+bob, 8, 4, '#c4657e');
+    R(8, 15+bob, 10, 4, '#a34a60');                     // skirt flares
+    R(9, 19+bob, 8, 1, '#7e3a4e');                      // hem
+    // arms — swing opposite the boy
+    const armUp = !reduced && Math.sin(t/300 + Math.PI/2) > 0;
+    if (armUp){
+      R(7, 8+bob, 2, 5, '#f4cfa4');
+      R(17, 12+bob, 2, 5, '#f4cfa4');
+      R(5, 6+bob, 2, 2, '#e8a0b4');                     // little wave
+    } else {
+      R(7, 12+bob, 2, 5, '#f4cfa4');
+      R(17, 12+bob, 2, 5, '#f4cfa4');
+    }
+    // legs — step opposite phase
+    const step = !reduced && Math.sin(t/300 + Math.PI/2) > 0 ? 1 : 0;
+    R(10, 18+bob, 2, 6, '#f4cfa4');
+    R(14, 18+bob, 2, 6, '#f4cfa4');
+    R(10, 23+bob+step, 3, 2, '#a33a2a');                 // little boots
+    R(14, 23+bob+(1-step), 3, 2, '#a33a2a');
+  }
+}
+
+function paintDancerSelection(){
+  $('#dancer-kang').classList.toggle('selected', state.recorder === 'kang');
+  $('#dancer-natasha').classList.toggle('selected', state.recorder === 'natasha');
+  $('#brewer-note').textContent = (state.recorder === 'kang' ? 'KANG' : 'NATASHA') + ' IS RECORDING';
+}
+
+function setRecorder(who){
+  state.recorder = who;
+  paintDancerSelection();
+  try{ localStorage.setItem('coffee-diary-recorder', who); }catch{}
+}
+
+// dancer canvases + animation loop (separate from main scene)
+(function dancerLoop(){
+  const boy = document.getElementById('dancer-boy');
+  const girl = document.getElementById('dancer-girl');
+  if (!boy || !girl) return;
+  const bctx = boy.getContext('2d');
+  const gctx = girl.getContext('2d');
+  function tick(t){
+    drawDancer(bctx, 'kang', t);
+    drawDancer(gctx, 'natasha', t);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+// click / keyboard select
+$('#dancer-kang').addEventListener('click', () => { setRecorder('kang'); toast('KANG IS RECORDING'); });
+$('#dancer-natasha').addEventListener('click', () => { setRecorder('natasha'); toast('NATASHA IS RECORDING'); });
+['#dancer-kang', '#dancer-natasha'].forEach(sel => {
+  $(sel).addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $(sel).click(); }
+  });
+});
+try{ const saved = localStorage.getItem('coffee-diary-recorder'); if (saved) state.recorder = saved; }catch{}
+paintDancerSelection();
+
+
 const beanPop = $('#bean-pop');
 function openBeanPop(x, y){
   renderBeanPop();
@@ -911,6 +1028,7 @@ $('#brew-form').addEventListener('submit', async e => {
     seconds: parseInt($('#f-seconds').value, 10),
     rating: state.rating,
     notes: $('#f-notes').value.trim(),
+    recorder: state.recorder,
   };
   if (!brew.grind && brew.grind !== 0){ toast('ENTER A GRIND SETTING', true); return; }
   if (!brew.water_g && brew.water_g !== 0){ toast('ENTER WATER', true); return; }
@@ -1019,7 +1137,7 @@ function renderEntries(){
         <canvas class="entry-icon" width="26" height="26"></canvas>
         <div>
           <div class="entry-title">${escapeHtml(x.bean)}</div>
-          <div class="entry-date">${fmtDate(x.created_at)} · ${methodLabel}</div>
+          <div class="entry-date">${fmtDate(x.created_at)} · ${methodLabel}${x.recorder ? ' · logged by ' + (x.recorder === 'natasha' ? 'Natasha' : 'Kang') : ''}</div>
         </div>
       </div>
       <div class="entry-params">

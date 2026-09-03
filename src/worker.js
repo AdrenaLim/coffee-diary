@@ -6,6 +6,7 @@ const json = (data, status = 200) =>
   });
 
 const METHODS = new Set(['latte', 'icelatte', 'coldbrew']);
+const RECORDERS = new Set(['kang', 'natasha']);
 
 function parseBrew(body) {
   const errors = [];
@@ -36,6 +37,9 @@ function parseBrew(body) {
   if (!Number.isInteger(rating) || rating < 1 || rating > 10) errors.push('rating must be an integer 1-10');
 
   const notes = String(body.notes || '').trim().slice(0, 600);
+  const recorder = RECORDERS.has(String(body.recorder || '').trim().toLowerCase())
+    ? String(body.recorder).trim().toLowerCase()
+    : 'kang';
 
   if (errors.length) return { errors };
   return {
@@ -49,6 +53,7 @@ function parseBrew(body) {
       seconds: seconds == null ? 0 : Math.round(seconds),
       rating,
       notes,
+      recorder,
     },
   };
 }
@@ -80,10 +85,10 @@ export default {
         const { errors, brew } = parseBrew(body);
         if (errors) return json({ error: errors.join('; ') }, 400);
         const { success, meta } = await env.DB.prepare(
-          `INSERT INTO brews (method, bean, grind, dose_g, water_g, milk_g, seconds, rating, notes)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO brews (method, bean, grind, dose_g, water_g, milk_g, seconds, rating, notes, recorder)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
-          .bind(brew.method, brew.bean, brew.grind, brew.dose_g, brew.water_g, brew.milk_g, brew.seconds, brew.rating, brew.notes)
+          .bind(brew.method, brew.bean, brew.grind, brew.dose_g, brew.water_g, brew.milk_g, brew.seconds, brew.rating, brew.notes, brew.recorder)
           .run();
         const id = meta.last_row_id;
         const row = await env.DB.prepare('SELECT * FROM brews WHERE id = ?').bind(id).first();

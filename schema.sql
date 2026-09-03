@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS brews (
   seconds INTEGER NOT NULL,         -- extraction / steep time (0 = untimed)
   rating INTEGER NOT NULL,          -- 1..10 stars
   notes TEXT DEFAULT '',            -- tasting notes
+  recorder TEXT NOT NULL DEFAULT 'kang',  -- who logged it: kang | natasha
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_brews_created ON brews(created_at DESC);

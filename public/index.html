@@ -96,6 +96,30 @@
   }
   #bean-pop .bp-x:hover{background:#f0d9c8; color:var(--accent-deep); border-color:var(--accent);}
 
+  /* ============ dancer picker (who is recording) ============ */
+  .brewer-pick{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    background:var(--cream); border:1.5px solid var(--border); border-radius:4px;
+    padding:10px 12px; margin-bottom:16px; flex-wrap:wrap;
+  }
+  .dancer-wrap{
+    cursor:pointer; text-align:center; padding:6px 8px 4px; border:2px solid transparent; border-radius:4px;
+    transition:border-color .15s, background .15s, transform .1s;
+  }
+  .dancer-wrap:hover{transform:translateY(-2px);}
+  .dancer-wrap canvas{display:block; image-rendering:pixelated;}
+  .dancer-name{
+    font-family:'Press Start 2P',monospace; font-size:6.5px; letter-spacing:1px; color:var(--muted);
+    display:block; margin-top:4px;
+  }
+  .dancer-wrap.selected{border-color:var(--accent); background:var(--card);}
+  .dancer-wrap.selected .dancer-name{color:var(--accent-deep);}
+  .dancer-arrow{color:var(--rule); font-size:18px; user-select:none;}
+  .dancer-note{
+    font-family:'Press Start 2P',monospace; font-size:7px; letter-spacing:1px; color:var(--accent-deep);
+    text-align:center; min-width:130px;
+  }
+
   /* ============ form ============ */
   .field{margin-bottom:14px;}
   label{display:block; color:var(--ink-soft);
@@ -303,6 +327,20 @@
     <section class="card" aria-label="Log a brew">
       <h2>Log today's brew <span class="tag">NEW ENTRY</span></h2>
       <p class="sub" id="form-sub">Every cup teaches you something. Write it down before you forget.</p>
+
+      <div class="brewer-pick" aria-label="Who is recording">
+        <div class="dancer-wrap" id="dancer-kang" role="button" tabindex="0" aria-label="Kang is recording">
+          <canvas id="dancer-boy" width="52" height="56"></canvas>
+          <span class="dancer-name">KANG</span>
+        </div>
+        <div class="dancer-arrow">→</div>
+        <div class="dancer-note" id="brewer-note">KANG is recording</div>
+        <div class="dancer-arrow">←</div>
+        <div class="dancer-wrap" id="dancer-natasha" role="button" tabindex="0" aria-label="Natasha is recording">
+          <canvas id="dancer-girl" width="52" height="56"></canvas>
+          <span class="dancer-name">NATASHA</span>
+        </div>
+      </div>
 
       <div class="method-toggle" role="radiogroup" aria-label="Method">
         <button type="button" id="m-latte" class="active"><canvas width="26" height="26" data-icon="latte"></canvas>LATTE</button>
