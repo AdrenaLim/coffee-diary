@@ -685,13 +685,20 @@ function drawDancer(ctx, who, t){
 function paintDancerSelection(){
   $('#dancer-kang').classList.toggle('selected', state.recorder === 'kang');
   $('#dancer-natasha').classList.toggle('selected', state.recorder === 'natasha');
-  $('#brewer-note').textContent = (state.recorder === 'kang' ? 'KANG' : 'NATASHA') + ' IS RECORDING';
 }
 
 function setRecorder(who){
   state.recorder = who;
   paintDancerSelection();
   try{ localStorage.setItem('coffee-diary-recorder', who); }catch{}
+  drawRaterIcon();
+}
+
+// mini dancer icon on the Rating label — shows who is rating
+function drawRaterIcon(){
+  const cv = document.getElementById('rater-icon');
+  if (!cv) return;
+  drawDancer(cv.getContext('2d'), state.recorder, 0);   // t=0 → static pose
 }
 
 // dancer canvases + animation loop (separate from main scene)
@@ -719,6 +726,7 @@ $('#dancer-natasha').addEventListener('click', () => { setRecorder('natasha'); t
 });
 try{ const saved = localStorage.getItem('coffee-diary-recorder'); if (saved) state.recorder = saved; }catch{}
 paintDancerSelection();
+drawRaterIcon();
 
 
 const beanPop = $('#bean-pop');
@@ -1132,7 +1140,9 @@ function renderEntries(){
     el.innerHTML = `
       <button class="del" title="Delete entry" aria-label="Delete entry">✕</button>
       ${best && x.id === best.id ? '<div class="entry-best">★ BEST</div>' : ''}
-      <div class="entry-score ${x.rating >= 8 ? 'gold' : ''}" title="${x.rating} out of 10">${x.rating}</div>
+      <div class="entry-side">
+        <div class="entry-score ${x.rating >= 8 ? 'gold' : ''}" title="${x.rating} out of 10">${x.rating}</div>
+      </div>
       <div class="entry-head">
         <canvas class="entry-icon" width="26" height="26"></canvas>
         <div>
@@ -1146,10 +1156,16 @@ function renderEntries(){
         <span class="p">WATER <b>${escapeHtml(x.water_g)}ml</b></span>
         ${x.milk_g ? `<span class="p">MILK <b>${escapeHtml(x.milk_g)}ml</b></span>` : ''}
         <span class="p">${x.method === 'coldbrew' ? 'STEEP' : 'PULL'} <b>${fmtSeconds(x.seconds)}</b></span>
+        <span class="p-recorder" title="logged by ${x.recorder === 'natasha' ? 'Natasha' : 'Kang'}">
+          <canvas width="52" height="56"></canvas>
+          ${x.recorder === 'natasha' ? 'NATASHA' : 'KANG'}
+        </span>
       </div>
       ${x.notes ? `<div class="entry-notes">“${escapeHtml(x.notes)}”</div>` : ''}
     `;
-    drawIcon(el.querySelector('canvas'), x.method);
+    drawIcon(el.querySelector('.entry-icon'), x.method);
+    const recCanvas = el.querySelector('.p-recorder canvas');
+    if (recCanvas) drawDancer(recCanvas.getContext('2d'), x.recorder === 'natasha' ? 'natasha' : 'kang', 0);
     el.querySelector('.del').addEventListener('click', async () => {
       if (!confirm('Tear this page out of the diary?')) return;
       try{

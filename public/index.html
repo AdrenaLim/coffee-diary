@@ -98,27 +98,21 @@
 
   /* ============ dancer picker (who is recording) ============ */
   .brewer-pick{
-    display:flex; align-items:center; justify-content:center; gap:14px;
-    background:var(--cream); border:1.5px solid var(--border); border-radius:4px;
-    padding:10px 12px; margin-bottom:16px; flex-wrap:wrap;
+    display:flex; align-items:flex-end; justify-content:center; gap:22px;
+    padding:8px 12px 6px; margin-bottom:14px; flex-wrap:wrap;
   }
   .dancer-wrap{
-    cursor:pointer; text-align:center; padding:6px 8px 4px; border:2px solid transparent; border-radius:4px;
+    cursor:pointer; text-align:center; padding:4px 8px 2px; border:2px solid transparent; border-radius:4px;
     transition:border-color .15s, background .15s, transform .1s;
   }
   .dancer-wrap:hover{transform:translateY(-2px);}
-  .dancer-wrap canvas{display:block; image-rendering:pixelated;}
+  .dancer-wrap canvas{display:block; image-rendering:pixelated; width:39px; height:42px;}
   .dancer-name{
-    font-family:'Press Start 2P',monospace; font-size:6.5px; letter-spacing:1px; color:var(--muted);
-    display:block; margin-top:4px;
+    font-family:'Press Start 2P',monospace; font-size:6px; letter-spacing:1px; color:var(--muted);
+    display:block; margin-top:2px;
   }
   .dancer-wrap.selected{border-color:var(--accent); background:var(--card);}
   .dancer-wrap.selected .dancer-name{color:var(--accent-deep);}
-  .dancer-arrow{color:var(--rule); font-size:18px; user-select:none;}
-  .dancer-note{
-    font-family:'Press Start 2P',monospace; font-size:7px; letter-spacing:1px; color:var(--accent-deep);
-    text-align:center; min-width:130px;
-  }
 
   /* ============ form ============ */
   .field{margin-bottom:14px;}
@@ -178,6 +172,28 @@
     font-family:'Press Start 2P',monospace; font-size:9px; color:var(--accent-deep);
     background:var(--cream); border:1.5px solid var(--rule); padding:6px 8px; min-width:70px; text-align:center; flex:none;
   }
+
+  #rater-icon{
+    width:26px; height:28px; image-rendering:pixelated;
+    vertical-align:-9px; margin:0 3px;
+  }
+  .entry-score{
+    width:40px; height:40px; border-radius:50%; flex:none;
+    background:var(--card); border:2px solid var(--rule);
+    font-family:'Press Start 2P',monospace; font-size:10px; color:var(--accent-deep);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .entry-score.gold{background:var(--gold); border-color:var(--accent); color:#3a2a10;}
+  .entry-side{
+    position:absolute; top:12px; right:44px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .entry-params .p-recorder{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'Press Start 2P',monospace; font-size:6.5px; letter-spacing:.5px;
+    background:var(--card); border:1px solid var(--border); padding:4px 8px; color:var(--ink-soft);
+  }
+  .entry-params .p-recorder canvas{width:19px; height:20px; image-rendering:pixelated; display:block;}
 
   /* score picker — star badges that shine gold when lit */
   .stars{display:flex; gap:5px; flex-wrap:wrap;}
@@ -248,13 +264,7 @@
   .entry-icon{image-rendering:pixelated; margin-top:2px; border:1px solid var(--border); background:var(--card); padding:3px; flex:none;}
   .entry-title{font-weight:700; font-size:17px; font-family:'Playfair Display',serif;}
   .entry-date{color:var(--muted); font-size:12.5px; font-style:italic;}
-  .entry-score{
-    position:absolute; top:12px; right:48px; width:40px; height:40px; border-radius:50%;
-    background:var(--card); border:2px solid var(--rule);
-    font-family:'Press Start 2P',monospace; font-size:10px; color:var(--accent-deep);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .entry-score.gold{background:var(--gold); border-color:var(--accent); color:#3a2a10;}
+  .entry-head{padding-right:96px;}
   .entry-best{
     position:absolute; top:12px; right:-6px; background:var(--gold); color:#3a2a10;
     font-family:'Press Start 2P',monospace; font-size:6.5px; padding:5px 8px; letter-spacing:1px;
@@ -333,9 +343,6 @@
           <canvas id="dancer-boy" width="52" height="56"></canvas>
           <span class="dancer-name">KANG</span>
         </div>
-        <div class="dancer-arrow">→</div>
-        <div class="dancer-note" id="brewer-note">KANG is recording</div>
-        <div class="dancer-arrow">←</div>
         <div class="dancer-wrap" id="dancer-natasha" role="button" tabindex="0" aria-label="Natasha is recording">
           <canvas id="dancer-girl" width="52" height="56"></canvas>
           <span class="dancer-name">NATASHA</span>
@@ -393,7 +400,10 @@
         </div>
 
         <div class="field">
-          <label>Rating <span class="hint">1–10, be honest, future-you is reading</span></label>
+          <label class="rating-label">Rating
+            <canvas id="rater-icon" width="52" height="56" title="who is rating this brew"></canvas>
+            <span class="hint">1–10, be honest, future-you is reading</span>
+          </label>
           <div class="stars" id="stars"></div>
         </div>
 
