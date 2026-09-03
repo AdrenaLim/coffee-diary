@@ -105,6 +105,27 @@ export default {
       return meta.changes > 0 ? json({ ok: true }) : json({ error: 'not found' }, 404);
     }
 
+    if (del && request.method === 'PUT') {
+      const id = Number(del[1]);
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: 'invalid JSON body' }, 400);
+      }
+      const { errors, brew } = parseBrew(body);
+      if (errors) return json({ error: errors.join('; ') }, 400);
+      const { meta } = await env.DB.prepare(
+        `UPDATE brews SET method=?, bean=?, grind=?, dose_g=?, water_g=?, milk_g=?, seconds=?, rating=?, notes=?, recorder=?
+         WHERE id = ?`
+      )
+        .bind(brew.method, brew.bean, brew.grind, brew.dose_g, brew.water_g, brew.milk_g, brew.seconds, brew.rating, brew.notes, brew.recorder, id)
+        .run();
+      if (!meta.changes) return json({ error: 'not found' }, 404);
+      const row = await env.DB.prepare('SELECT * FROM brews WHERE id = ?').bind(id).first();
+      return json({ brew: row });
+    }
+
     if (path === '/api/health') return json({ ok: true, ts: Date.now() });
 
     return env.ASSETS.fetch(request);

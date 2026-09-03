@@ -20,6 +20,7 @@ const state = {
   currentBean: null,
   removedBeans: [],
   recorder: 'kang',
+  editingId: null,   // set when editing an existing diary entry
 };
 
 const COMMON_BEANS = [
@@ -1024,6 +1025,63 @@ function currentDose(){
   return sel ? parseFloat(sel.dataset.dose) : NaN;
 }
 
+/* ================================================================
+   EDIT MODE — click a diary entry to load it back into the form
+================================================================ */
+function setEditMode(id){
+  state.editingId = id;
+  const on = id != null;
+  $('#form-sub').textContent = on
+    ? 'Editing an existing page of the diary. Update it and save.'
+    : 'Every cup teaches you something. Write it down before you forget.';
+  document.querySelector('#save-btn').textContent = on ? '↻ UPDATE THIS BREW' : '+ LOG THIS BREW';
+  document.querySelector('h2 .tag').textContent = on ? 'EDITING' : 'NEW ENTRY';
+}
+
+function startEdit(x){
+  // load the brew into the form
+  setMethod(x.method);
+  $('#f-bean').value = x.bean;
+  $('#f-grind').value = x.grind;
+  $('#grind-val').textContent = x.grind;
+  // dose: chips or slider
+  const d = METHOD_DEFS[x.method];
+  if (d.doseSlider){
+    const el = $('#f-dose-range');
+    if (el) el.value = x.dose_g;
+    const dv = $('#dose-val');
+    if (dv) dv.textContent = x.dose_g + 'g';
+  } else {
+    doseToggleEl.querySelectorAll('[data-dose]').forEach(b => {
+      b.classList.toggle('selected', parseFloat(b.dataset.dose) === parseFloat(x.dose_g));
+    });
+  }
+  $('#f-water').value = x.water_g;
+  if (d.milk){
+    $('#f-milk').value = x.milk_g || d.milk[2];
+    $('#milk-val').textContent = ($('#f-milk').value) + 'ml';
+  }
+  $('#f-seconds').value = x.seconds || '';
+  $('#f-notes').value = x.notes || '';
+  state.rating = x.rating; paintStars();
+  if (x.recorder) setRecorder(x.recorder);
+  setEditMode(x.id);
+  renderEntries();   // show the editing highlight on this entry
+  // scroll to the form and flash it
+  document.querySelector('.top-grid > section.card[aria-label="Log a brew"]').scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block: 'start'});
+  toast('EDITING: ' + x.bean.toUpperCase());
+}
+
+function cancelEdit(){
+  if (state.editingId == null) return;
+  setEditMode(null);
+  $('#f-seconds').value = ''; $('#f-notes').value = '';
+  state.rating = 0; paintStars();
+  setMethod(state.method);   // reset defaults for the method
+  renderEntries();           // clear the editing highlight
+  toast('BACK TO NEW ENTRY');
+}
+
 $('#brew-form').addEventListener('submit', async e => {
   e.preventDefault();
   const brew = {
@@ -1043,26 +1101,35 @@ $('#brew-form').addEventListener('submit', async e => {
   if (!brew.dose_g && brew.dose_g !== 0){ toast('PICK A DOSE', true); return; }
   if (!brew.rating){ toast('GIVE IT A RATING', true); return; }
 
+  const editing = state.editingId != null;
   const btn = $('#save-btn');
   btn.disabled = true; btn.textContent = 'SAVING...';
   try{
-    const data = await api('/api/brews', {
-      method:'POST',
+    const data = await api(editing ? '/api/brews/' + state.editingId : '/api/brews', {
+      method: editing ? 'PUT' : 'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(brew),
     });
-    state.brews.unshift(data.brew);
+    if (editing){
+      // replace in place, keep list order as-is (render re-sorts)
+      const i = state.brews.findIndex(b => b.id === state.editingId);
+      if (i >= 0) state.brews[i] = data.brew;
+    } else {
+      state.brews.unshift(data.brew);
+    }
     renderAll();
     celebrate(brew.rating);
-    toast('BREW LOGGED IN THE DIARY');
+    toast(editing ? 'PAGE UPDATED' : 'BREW LOGGED IN THE DIARY');
     // keep method + bean sticky; clear per-cup fields
     $('#f-seconds').value = ''; $('#f-notes').value = '';
     state.rating = 0; paintStars();
+    setEditMode(null);
     saveDraft();
   }catch(err){
     toast('SAVE FAILED: ' + err.message.toUpperCase(), true);
   }finally{
     btn.disabled = false; btn.textContent = '+ LOG THIS BREW';
+    if (state.editingId != null) btn.textContent = '↻ UPDATE THIS BREW';
   }
 });
 
@@ -1134,7 +1201,7 @@ function renderEntries(){
   }
   for (const x of list){
     const el = document.createElement('article');
-    el.className = 'entry method-' + x.method;
+    el.className = 'entry method-' + x.method + (state.editingId === x.id ? ' editing' : '');
     el.id = 'entry-' + x.id;
     const methodLabel = METHOD_DEFS[x.method] ? METHOD_DEFS[x.method].label.toLowerCase() : x.method;
     el.innerHTML = `
@@ -1166,7 +1233,14 @@ function renderEntries(){
     drawIcon(el.querySelector('.entry-icon'), x.method);
     const recCanvas = el.querySelector('.p-recorder canvas');
     if (recCanvas) drawDancer(recCanvas.getContext('2d'), x.recorder === 'natasha' ? 'natasha' : 'kang', 0);
-    el.querySelector('.del').addEventListener('click', async () => {
+    // click anywhere on the entry (except the delete button) → edit it
+    el.addEventListener('click', e => {
+      if (e.target.closest('.del')) return;
+      if (state.editingId === x.id){ cancelEdit(); return; }   // click again to cancel
+      startEdit(x);
+    });
+    el.querySelector('.del').addEventListener('click', async e => {
+      e.stopPropagation();
       if (!confirm('Tear this page out of the diary?')) return;
       try{
         await api('/api/brews/' + x.id, {method:'DELETE'});

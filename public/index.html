@@ -255,6 +255,16 @@
   .entry{
     background:var(--cream); border:1px solid var(--border); border-left:4px solid var(--caramel);
     padding:16px 18px; position:relative; box-shadow:2px 3px 0 rgba(56,39,24,.08);
+    cursor:pointer;
+  }
+  .entry:hover{border-color:var(--rule);}
+  .entry.editing{
+    border-color:var(--accent); box-shadow:3px 4px 0 rgba(163,74,36,.25);
+    background:#fbf0e2;
+  }
+  .entry.editing::after{
+    content:'EDITING — CLICK AGAIN TO CANCEL'; position:absolute; bottom:8px; right:12px;
+    font-family:'Press Start 2P',monospace; font-size:5.5px; color:var(--accent); letter-spacing:1px;
   }
   .entry.method-icelatte{border-left-color:#5a8ab0;}
   .entry.method-coldbrew{border-left-color:var(--accent);}
@@ -437,7 +447,7 @@
         <button type="button" data-filter="bean">BY BEAN</button>
       </div>
     </div>
-    <p class="sub">Best brew sits on top with the gold badge. Filter by method, or by bean.</p>
+    <p class="sub">Best brew sits on top with the gold badge. Click an entry to edit it.</p>
     <div id="bean-filter-note"></div>
     <div class="entries" id="entries">
       <div class="empty" id="empty-state">
