@@ -1249,11 +1249,11 @@ function renderEntries(){
         </div>
       </div>
       <div class="entry-params">
-        <span class="p">GRIND <b>${escapeHtml(x.grind)}</b></span>
-        <span class="p">DOSE <b>${escapeHtml(x.dose_g)}g</b></span>
-        <span class="p">WATER <b>${escapeHtml(x.water_g)}ml</b></span>
+        ${x.grind ? `<span class="p">GRIND <b>${escapeHtml(x.grind)}</b></span>` : ''}
+        ${x.dose_g ? `<span class="p">DOSE <b>${escapeHtml(x.dose_g)}g</b></span>` : ''}
+        ${x.water_g ? `<span class="p">WATER <b>${escapeHtml(x.water_g)}ml</b></span>` : ''}
         ${x.milk_g ? `<span class="p">MILK <b>${escapeHtml(x.milk_g)}ml</b></span>` : ''}
-        <span class="p">${x.method === 'coldbrew' ? 'STEEP' : 'PULL'} <b>${fmtSeconds(x.seconds)}</b></span>
+        ${x.seconds ? `<span class="p">${x.method === 'coldbrew' ? 'STEEP' : 'PULL'} <b>${fmtSeconds(x.seconds)}</b></span>` : ''}
         <span class="p-recorder" title="logged by ${x.recorder === 'natasha' ? 'Natasha' : 'Kang'}">
           <canvas width="52" height="56"></canvas>
           ${x.recorder === 'natasha' ? 'NATASHA' : 'KANG'}
